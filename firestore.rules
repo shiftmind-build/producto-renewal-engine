@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// Generado por la fabrica desde backend/blueprint.yaml. No se edita a mano.
+//
+// Deny by default: lo que no aparece aqui esta cerrado, y cada entidad declara
+// explicitamente quien lee, quien crea, quien edita y quien borra. Ningun
+// `allow read, write: if true`, ni siquiera temporalmente para probar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /plans/{docId} {
+      allow read: if request.auth != null;
+      allow create: if (request.auth.token.role in ['owner'])
+                       && request.resource.data.keys().hasOnly(['nombre', 'precio_centavos', 'intervalo', 'periodo_gracia_dias', 'activo'])
+                       && request.auth != null;
+      allow update: if (request.auth.token.role in ['owner'])
+                       && request.resource.data.keys().hasOnly(['nombre', 'precio_centavos', 'intervalo', 'periodo_gracia_dias', 'activo'])
+                       && request.auth != null;
+      allow delete: if false;
+    }
+
+    match /subscriptions/{docId} {
+      allow read: if request.auth.uid == resource.data.member_id || request.auth.token.role in ['staff', 'owner'];
+      allow create: if (request.auth.token.role in ['owner'])
+                       && request.resource.data.keys().hasOnly(['member_id', 'plan_id', 'estado', 'periodo_fin', 'cancelada_en', 'stripe_subscription_id'])
+                       && request.auth != null;
+      allow update: if (request.auth.token.role in ['owner'])
+                       && request.resource.data.keys().hasOnly(['member_id', 'plan_id', 'estado', 'periodo_fin', 'cancelada_en', 'stripe_subscription_id'])
+                       && request.auth != null;
+      allow delete: if false;
+    }
+
+    match /payments/{docId} {
+      allow read: if request.auth.uid == get(/databases/$(database)/documents/subscriptions/$(resource.data.subscription_id)).data.member_id || request.auth.token.role in ['staff', 'owner'];
+      allow create: if (false)
+                       && request.resource.data.keys().hasOnly(['subscription_id', 'importe_centavos', 'moneda', 'estado', 'intento', 'stripe_payment_intent_id', 'creado_en'])
+                       && request.auth != null;
+      allow update: if (false)
+                       && request.resource.data.keys().hasOnly(['subscription_id', 'importe_centavos', 'moneda', 'estado', 'intento', 'stripe_payment_intent_id', 'creado_en'])
+                       && request.auth != null;
+      allow delete: if false;
+    }
+
+    match /dunning_attempts/{docId} {
+      allow read: if request.auth.token.role in ['staff', 'owner'];
+      allow create: if (false)
+                       && request.resource.data.keys().hasOnly(['payment_id', 'numero_intento', 'programado_para', 'ejecutado_en', 'resultado'])
+                       && request.auth != null;
+      allow update: if (false)
+                       && request.resource.data.keys().hasOnly(['payment_id', 'numero_intento', 'programado_para', 'ejecutado_en', 'resultado'])
+                       && request.auth != null;
+      allow delete: if false;
+    }
+
+    match /access_grants/{docId} {
+      allow read: if request.auth.uid == resource.data.member_id || request.auth.token.role in ['staff', 'owner'];
+      allow create: if (false)
+                       && request.resource.data.keys().hasOnly(['member_id', 'activo', 'concedido_en', 'revocado_en', 'motivo'])
+                       && request.auth != null;
+      allow update: if (false)
+                       && request.resource.data.keys().hasOnly(['member_id', 'activo', 'concedido_en', 'revocado_en', 'motivo'])
+                       && request.auth != null;
+      allow delete: if false;
+    }
+
+    // Cualquier coleccion no declarada en el blueprint no existe para nadie.
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}

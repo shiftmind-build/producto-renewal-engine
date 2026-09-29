@@ -1,0 +1,28 @@
+{
+  "color": {
+    "bg": "#F7F8FA",
+    "surface": "#FFFFFF",
+    "ink": "#111827",
+    "accent": "#2563EB",
+    "accent2": "#6B7280"
+  },
+  "colorDark": {
+    "bg": "#F7F8FA",
+    "surface": "#FFFFFF",
+    "ink": "#111827",
+    "accent": "#2563EB",
+    "accent2": "#6B7280"
+  },
+  "font": {
+    "heading": "Inter",
+    "headingWeight": 600,
+    "body": "Inter",
+    "bodyWeight": 400
+  },
+  "radius": "4px",
+  "shadow": "none",
+  "motion": {
+    "durationMs": 100,
+    "easing": "linear"
+  }
+}

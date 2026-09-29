@@ -1,0 +1,82 @@
+# Producto 1 del catalogo -- Renewal Engine.
+#
+# El motor: cobrar. Lo que hace solo mientras el duenyo duerme es reintentar la tarjeta
+# que fallo con una escalera de intentos, cortar el acceso al agotarla y devolverlo en
+# cuanto el cobro entra. Ese comportamiento es el producto; las pantallas solo lo miran.
+#
+# Se construye con la fabrica como cualquier cliente, y ese es el segundo objetivo:
+# cuatro pasadas reales por el procedimiento antes de que lo sufra un cliente que paga.
+proyecto:
+  nombre: "Renewal Engine"
+  formato: webapp
+  paleta: 2
+  tipografia: 2
+  efecto: 1
+  roles: [owner, staff, member]
+  entidades:
+    - nombre: plans
+      campos: [nombre, precio_centavos, intervalo, periodo_gracia_dias, activo]
+      quien_lee: "cualquier usuario autenticado"
+      quien_escribe: "solo owner"
+      acceso:
+        lee: [{"autenticado": true}]
+        escribe: [{"rol": ["owner"]}]
+        borra: []
+    - nombre: subscriptions
+      campos: [member_id, plan_id, estado, periodo_fin, cancelada_en, stripe_subscription_id]
+      quien_lee: "el propio member (member_id), y staff u owner"
+      quien_escribe: "solo owner; el estado lo mueve el webhook, nunca el navegador"
+      acceso:
+        lee: [{"propio": "member_id"}, {"rol": ["staff", "owner"]}]
+        escribe: [{"rol": ["owner"]}]
+        borra: []
+    - nombre: payments
+      campos: [subscription_id, importe_centavos, moneda, estado, intento, stripe_payment_intent_id, creado_en]
+      quien_lee: "el member de la suscripcion, y staff u owner"
+      quien_escribe: "solo el webhook de Stripe, idempotente por event_id"
+      acceso:
+        lee: [{"via": ["subscriptions", "subscription_id", "member_id"]}, {"rol": ["staff", "owner"]}]
+        escribe: [{"sistema": true}]
+        borra: []
+    - nombre: dunning_attempts
+      campos: [payment_id, numero_intento, programado_para, ejecutado_en, resultado]
+      quien_lee: "staff u owner"
+      quien_escribe: "solo el proceso programado"
+      acceso:
+        lee: [{"rol": ["staff", "owner"]}]
+        escribe: [{"sistema": true}]
+        borra: []
+    - nombre: access_grants
+      campos: [member_id, activo, concedido_en, revocado_en, motivo]
+      quien_lee: "el propio member, y staff u owner"
+      quien_escribe: "solo el sistema, a partir del estado de la suscripcion"
+      acceso:
+        lee: [{"propio": "member_id"}, {"rol": ["staff", "owner"]}]
+        escribe: [{"sistema": true}]
+        borra: []
+  acciones_core:
+    - "contratar un plan y pagar la primera cuota"
+    - "cobrar la renovacion al vencer el periodo"
+    - "reintentar un cobro fallido en dias 1, 3 y 7"
+    - "revocar el acceso al agotar los reintentos"
+    - "restaurar el acceso en cuanto un cobro entra"
+    - "avisar al owner de las suscripciones en riesgo"
+    - "consultar mi propia suscripcion y mis pagos"
+  pantallas:
+    - panel del owner con ingresos y suscripciones en riesgo
+    - listado de miembros con estado de acceso
+    - detalle de una suscripcion con su historial de cobros
+    - area del miembro con su plan, su factura y su metodo de pago
+    - catalogo de planes y alta
+  fuera_de_alcance:
+    - facturacion con impuestos por pais
+    - cambios de plan a mitad de periodo con prorrateo
+    - cupones y precios promocionales
+    - varios metodos de pago por miembro
+    - pasarelas distintas de Stripe
+  landing_keywords:
+    - subscription billing software
+    - failed payment recovery
+    - dunning management
+    - recurring revenue
+  datos_sensibles: false
