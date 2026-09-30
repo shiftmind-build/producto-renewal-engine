@@ -1,0 +1,17 @@
+:root {
+  --bg: #F7F8FA;
+  --superficie: #FFFFFF;
+  --tinta: #111827;
+  --acento: #2563EB;
+  --acento2: #6B7280;
+
+  --radio: 4px;
+  --sombra: none;
+  --duracion: 100ms;
+  --curva: linear;
+
+  --fuente-titular: 'Inter', system-ui, sans-serif;
+  --peso-titular: 600;
+  --fuente-cuerpo: 'Inter', system-ui, sans-serif;
+  --peso-cuerpo: 400;
+}
