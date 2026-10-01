@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { asyncHandler } from './lib/asyncHandler.js'
 import { requireRole, verificarAuth } from './lib/auth.js'
 import { ejecutarPendientes, programarEscalera, type Cobrador } from './motor/escalera.js'
+import { montaPanel } from './panel.js'
 
 /**
  * Las rutas. Nada llega a Firestore sin pasar antes por auth y por rol.
@@ -90,21 +91,7 @@ export function montaRutas(app: Express, cobrar: Cobrador) {
   )
 
   // --- lo que ve el duenyo del negocio ------------------------------------------
-  app.get(
-    '/panel/en-riesgo',
-    requireRole(['owner', 'staff']),
-    asyncHandler(async (_req: Request, res: Response) => {
-      const db = getFirestore()
-      // En riesgo = tiene una escalera viva. No "lleva un pago fallido": un fallo con
-      // los reintentos ya agotados no esta en riesgo, esta perdido, y mezclarlos hace
-      // que el panel deje de significar nada.
-      const vivos = await db
-        .collection('dunning_attempts')
-        .where('resultado', '==', 'pendiente')
-        .limit(200)
-        .get()
-      const pagos = [...new Set(vivos.docs.map((d) => d.data()['payment_id'] as string))]
-      res.status(200).json({ en_riesgo: pagos.length, pagos })
-    }),
-  )
+  // Las lecturas del panel viven en panel.ts: no guardan nada, componen. Una suscripcion
+  // en Firestore son tres identificadores, y en una pantalla eso no dice nada.
+  montaPanel(app)
 }
