@@ -280,6 +280,107 @@ h3 { font-size: 1rem; }
   padding: var(--hueco);
 }
 
+/* ---------------------------------------------------------------- demo */
+
+/*
+ * El aviso de datos inventados. Va arriba del todo y se lee: una demo que no se
+ * identifica como demo es una captura falsa con botones.
+ */
+.aviso-demo {
+  border: 1px dashed var(--borde);
+  background: var(--superficie);
+  color: var(--tinta-suave);
+  padding: 10px var(--hueco);
+  border-radius: var(--radio);
+  font-size: 0.8rem;
+  margin-bottom: var(--hueco);
+}
+
+.aviso-demo strong {
+  color: var(--tinta);
+}
+
+/* ---------------------------------------------------------------- detalle lateral */
+
+.panel {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  /* Se queda a la vista mientras se recorre la tabla de al lado. */
+  position: sticky;
+  top: var(--hueco);
+  max-height: calc(100vh - var(--hueco) * 2);
+  overflow-y: auto;
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hueco);
+  padding: var(--hueco);
+  border-bottom: 1px solid var(--borde);
+  position: sticky;
+  top: 0;
+  background: var(--superficie);
+}
+
+.panel-cabecera h3 {
+  margin: 0;
+}
+
+.panel-cuerpo {
+  padding: var(--hueco);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hueco);
+}
+
+/* Tabla + detalle. En movil el detalle cae debajo en vez de encogerse a nada. */
+.con-detalle {
+  display: grid;
+  gap: var(--hueco);
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .con-detalle {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+}
+
+/*
+ * La escalera de pasos: reintentos de cobro, estados de un documento, un turno.
+ * Los tres productos la necesitan y los tres la dibujaban distinta.
+ */
+.escalera {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.escalera li {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: var(--hueco-s);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 0.85rem;
+}
+
+.escalera li:last-child {
+  border-bottom: none;
+}
+
+.escalera time {
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }

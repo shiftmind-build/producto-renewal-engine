@@ -11,6 +11,29 @@
 
 const BASE = import.meta.env['VITE_API'] ?? ''
 
+/**
+ * El modo demo.
+ *
+ * Un panel vacio no se puede ensenar a nadie: una cola de moderacion sin nada que
+ * moderar y un tablero sin turnos parecen un producto roto, no un producto nuevo. Y una
+ * demo con backend detras exige una base de datos encendida, con datos sembrados, para
+ * que un desconocido haga clic un martes a las tres de la manana.
+ *
+ * Asi que la demo son las mismas pantallas contra respuestas fijas. No hay una segunda
+ * version del producto que pueda quedarse atras: es este codigo, con la red sustituida.
+ * Lo dice en la propia pantalla -- ver `AvisoDemo` -- porque ensenar datos inventados
+ * sin decirlo es exactamente lo que no vamos a hacer.
+ */
+let respuestasDemo: Record<string, unknown> | null = null
+
+export function modoDemo(respuestas: Record<string, unknown>) {
+  respuestasDemo = respuestas
+}
+
+export function esDemo() {
+  return respuestasDemo !== null
+}
+
 export class ErrorApi extends Error {
   constructor(
     public readonly estado: number,
@@ -35,6 +58,16 @@ function explica(estado: number, cuerpo: unknown): string {
 }
 
 export async function api<T>(ruta: string, opciones: RequestInit & { token?: string } = {}) {
+  if (respuestasDemo) {
+    const clave = ruta.split('?')[0] ?? ruta
+    const guardada = respuestasDemo[clave]
+    if (guardada === undefined) throw new ErrorApi(404, 'That is not part of the demo data.')
+    // Una espera corta a proposito: sin ella el estado de carga no se ve nunca y nadie
+    // se entera de que existe hasta que falla en produccion.
+    await new Promise((listo) => setTimeout(listo, 220))
+    return guardada as T
+  }
+
   const { token, ...resto } = opciones
   const r = await fetch(`${BASE}${ruta}`, {
     ...resto,
