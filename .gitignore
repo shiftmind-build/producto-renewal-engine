@@ -10,3 +10,4 @@ firestore-debug.log
 .firebase/
 frontend/node_modules/
 frontend/dist/
+.vite/
